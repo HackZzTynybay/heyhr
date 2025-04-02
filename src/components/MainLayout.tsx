@@ -1,7 +1,8 @@
+
 import React, { ReactNode, useState } from 'react';
 import { Link, useLocation } from 'react-router-dom';
 import Logo from './Logo';
-import { Search, Bell, ChevronDown } from 'lucide-react';
+import { Search, Bell, ChevronDown, Menu, X } from 'lucide-react';
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -19,6 +20,7 @@ const MainLayout: React.FC<MainLayoutProps> = ({ children }) => {
   const location = useLocation();
   const { onboardingData, logoutUser } = useAuth();
   const [searchValue, setSearchValue] = useState('');
+  const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   
   const initials = onboardingData?.user?.firstName && onboardingData?.user?.lastName 
     ? `${onboardingData.user.firstName[0]}${onboardingData.user.lastName[0]}`
@@ -53,10 +55,26 @@ const MainLayout: React.FC<MainLayoutProps> = ({ children }) => {
     return location.pathname.startsWith('/organization');
   };
 
+  const toggleMobileMenu = () => {
+    setIsMobileMenuOpen(!isMobileMenuOpen);
+  };
+
   return (
-    <div className="min-h-screen bg-gray-100 flex">
-      {/* Sidebar */}
-      <div className="w-48 bg-white border-r border-gray-200 flex flex-col">
+    <div className="min-h-screen bg-gray-100 flex flex-col md:flex-row">
+      {/* Mobile menu button */}
+      <button 
+        className="md:hidden fixed top-4 left-4 z-50 bg-white p-2 rounded-md shadow-md"
+        onClick={toggleMobileMenu}
+      >
+        {isMobileMenuOpen ? <X size={20} /> : <Menu size={20} />}
+      </button>
+      
+      {/* Sidebar - hidden on mobile unless menu button is clicked */}
+      <div 
+        className={`${
+          isMobileMenuOpen ? 'translate-x-0' : '-translate-x-full'
+        } md:translate-x-0 transition-transform duration-300 fixed md:static z-40 h-full md:h-auto md:flex-shrink-0 md:w-48 bg-white border-r border-gray-200 flex flex-col overflow-auto`}
+      >
         <div className="p-4 border-b border-gray-200">
           <Logo />
         </div>
@@ -75,6 +93,7 @@ const MainLayout: React.FC<MainLayoutProps> = ({ children }) => {
                             ? 'text-blue-600 bg-blue-50 border-l-4 border-blue-600'
                             : 'text-gray-700 hover:bg-gray-100'
                         }`}
+                        onClick={() => setIsMobileMenuOpen(false)}
                       >
                         <div className="w-5 h-5 mr-2 flex items-center justify-center">
                           <svg 
@@ -107,6 +126,7 @@ const MainLayout: React.FC<MainLayoutProps> = ({ children }) => {
                                     ? 'text-blue-600 font-medium'
                                     : 'text-gray-600 hover:text-blue-600'
                                 }`}
+                                onClick={() => setIsMobileMenuOpen(false)}
                               >
                                 {subItem.title}
                               </Link>
@@ -123,6 +143,7 @@ const MainLayout: React.FC<MainLayoutProps> = ({ children }) => {
                           ? 'text-blue-600 bg-blue-50 border-l-4 border-blue-600'
                           : 'text-gray-700 hover:bg-gray-100'
                       }`}
+                      onClick={() => setIsMobileMenuOpen(false)}
                     >
                       <div className="w-5 h-5 mr-2 flex items-center justify-center">
                         {link.title === 'Dashboard' && (
@@ -178,6 +199,7 @@ const MainLayout: React.FC<MainLayoutProps> = ({ children }) => {
                 ? 'text-blue-600 bg-blue-50 border-l-4 border-blue-600'
                 : 'text-gray-700 hover:bg-gray-100'
             }`}
+            onClick={() => setIsMobileMenuOpen(false)}
           >
             <div className="w-5 h-5 mr-2 flex items-center justify-center">
               <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -219,7 +241,7 @@ const MainLayout: React.FC<MainLayoutProps> = ({ children }) => {
                     <Avatar className="h-8 w-8 bg-blue-500 text-white">
                       <AvatarFallback>{initials}</AvatarFallback>
                     </Avatar>
-                    <span className="text-sm text-blue-500">{initials}</span>
+                    <span className="text-sm text-blue-500 hidden sm:inline">{initials}</span>
                   </button>
                 </DropdownMenuTrigger>
                 <DropdownMenuContent align="end" className="w-56">
@@ -239,10 +261,18 @@ const MainLayout: React.FC<MainLayoutProps> = ({ children }) => {
         </header>
         
         {/* Page content */}
-        <main className="flex-1 overflow-y-auto p-6">
+        <main className="flex-1 overflow-y-auto p-4 sm:p-6">
           {children}
         </main>
       </div>
+      
+      {/* Dark overlay for mobile menu */}
+      {isMobileMenuOpen && (
+        <div 
+          className="md:hidden fixed inset-0 bg-black bg-opacity-50 z-30"
+          onClick={toggleMobileMenu}
+        />
+      )}
     </div>
   );
 };
