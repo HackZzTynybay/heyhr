@@ -4,10 +4,14 @@ import { Button } from '@/components/ui/button';
 import { useAuth } from '@/context/AuthContext';
 import OnboardingSidebar from '@/components/OnboardingSidebar';
 import { useNavigate } from 'react-router-dom';
-import { Upload, UserPlus } from 'lucide-react';
+import { Upload, UserPlus, Calendar as CalendarIcon, User, Mail, Briefcase, Building } from 'lucide-react';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import FormField from '@/components/FormField';
 import { toast } from '@/components/ui/use-toast';
+import { Calendar } from '@/components/ui/calendar';
+import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
+import { format } from 'date-fns';
+import { cn } from '@/lib/utils';
 
 interface Employee {
   id: string;
@@ -38,6 +42,8 @@ const SetupEmployees: React.FC = () => {
     department: ''
   });
   const [formErrors, setFormErrors] = useState<Record<string, string>>({});
+  const [dateOfBirth, setDateOfBirth] = useState<Date | undefined>();
+  const [joiningDate, setJoiningDate] = useState<Date | undefined>();
   
   const handleAddEmployee = () => {
     // Simple validation
@@ -52,7 +58,9 @@ const SetupEmployees: React.FC = () => {
     
     const employee = {
       id: `emp-${Date.now()}`,
-      ...newEmployee
+      ...newEmployee,
+      dateOfBirth: dateOfBirth ? format(dateOfBirth, 'yyyy-MM-dd') : '',
+      joiningDate: joiningDate ? format(joiningDate, 'yyyy-MM-dd') : ''
     };
     
     const updatedEmployees = [...employees, employee];
@@ -60,6 +68,15 @@ const SetupEmployees: React.FC = () => {
     updateOnboardingData({ employees: updatedEmployees });
     
     setShowAddDialog(false);
+    resetForm();
+    
+    toast({
+      title: 'Employee added',
+      description: `${employee.firstName} ${employee.lastName} has been added.`
+    });
+  };
+  
+  const resetForm = () => {
     setNewEmployee({
       firstName: '',
       lastName: '',
@@ -70,11 +87,9 @@ const SetupEmployees: React.FC = () => {
       jobTitle: '',
       department: ''
     });
-    
-    toast({
-      title: 'Employee added',
-      description: `${employee.firstName} ${employee.lastName} has been added.`
-    });
+    setDateOfBirth(undefined);
+    setJoiningDate(undefined);
+    setFormErrors({});
   };
   
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -96,68 +111,89 @@ const SetupEmployees: React.FC = () => {
     }
   };
   
+  const handleDateOfBirthChange = (date: Date | undefined) => {
+    setDateOfBirth(date);
+    if (date) {
+      setNewEmployee(prev => ({ ...prev, dateOfBirth: format(date, 'yyyy-MM-dd') }));
+    }
+  };
+  
+  const handleJoiningDateChange = (date: Date | undefined) => {
+    setJoiningDate(date);
+    if (date) {
+      setNewEmployee(prev => ({ ...prev, joiningDate: format(date, 'yyyy-MM-dd') }));
+    }
+  };
+  
   const handleSaveAndNext = () => {
     completeOnboarding();
+    navigate('/dashboard');
   };
   
   const handleSkip = () => {
     completeOnboarding();
+    navigate('/dashboard');
   };
 
   return (
-    <div className="flex min-h-screen bg-gray-100">
+    <div className="flex min-h-screen bg-gray-50">
       <OnboardingSidebar currentStep="employees" />
       
       <div className="flex-1 p-8">
         <div className="mb-8 flex justify-between items-center">
           <div>
-            <h1 className="text-2xl font-bold mb-1">Import Employees</h1>
+            <h1 className="text-2xl font-bold mb-1 text-blue-600">Import Employees</h1>
             <p className="text-gray-600">Choose your preferred method to import employees</p>
           </div>
           
           <div className="space-x-3">
             <Button variant="outline" onClick={handleSkip}>Skip</Button>
-            <Button onClick={handleSaveAndNext}>Save & Next</Button>
+            <Button 
+              onClick={handleSaveAndNext}
+              className="bg-blue-600 hover:bg-blue-700 text-white"
+            >
+              Save & Next
+            </Button>
           </div>
         </div>
         
         <div className="grid grid-cols-2 gap-6">
-          <div className="border border-gray-200 rounded-lg p-6 bg-white">
+          <div className="border border-blue-100 rounded-lg p-6 bg-white shadow-sm hover:shadow-md transition-shadow">
             <div className="flex flex-col items-center justify-center">
-              <div className="p-4 mb-4">
-                <Upload size={32} className="text-gray-400" />
+              <div className="p-4 bg-blue-50 rounded-full mb-4">
+                <Upload size={32} className="text-blue-600" />
               </div>
               
-              <h3 className="font-medium text-lg mb-2">CSV Import</h3>
+              <h3 className="font-medium text-lg mb-2 text-blue-700">CSV Import</h3>
               <p className="text-gray-600 text-sm text-center mb-4">
                 Upload your employee data using our CSV template
               </p>
               
-              <div className="w-full p-4 border border-dashed border-gray-300 rounded-md text-center text-gray-500 text-sm mb-4">
+              <div className="w-full p-4 border border-dashed border-blue-200 rounded-md text-center text-gray-500 text-sm mb-4 hover:bg-blue-50 transition-colors cursor-pointer">
                 Drag and drop your CSV file<br />
                 or click to browse
               </div>
               
-              <Button variant="link" className="text-brand-blue">
+              <Button variant="link" className="text-blue-600">
                 Download sample
               </Button>
             </div>
           </div>
           
-          <div className="border border-gray-200 rounded-lg p-6 bg-white">
+          <div className="border border-blue-100 rounded-lg p-6 bg-white shadow-sm hover:shadow-md transition-shadow">
             <div className="flex flex-col items-center justify-center">
-              <div className="p-4 mb-4">
-                <UserPlus size={32} className="text-gray-400" />
+              <div className="p-4 bg-blue-50 rounded-full mb-4">
+                <UserPlus size={32} className="text-blue-600" />
               </div>
               
-              <h3 className="font-medium text-lg mb-2">Add Manually</h3>
+              <h3 className="font-medium text-lg mb-2 text-blue-700">Add Manually</h3>
               <p className="text-gray-600 text-sm text-center mb-8">
                 Add employees one by one manually
               </p>
               
               <Button 
                 onClick={() => setShowAddDialog(true)}
-                className="bg-brand-blue hover:bg-blue-600"
+                className="bg-blue-600 hover:bg-blue-700 text-white"
               >
                 Add Employee
               </Button>
@@ -169,11 +205,11 @@ const SetupEmployees: React.FC = () => {
       <Dialog open={showAddDialog} onOpenChange={setShowAddDialog}>
         <DialogContent className="max-w-xl">
           <DialogHeader>
-            <DialogTitle>Add employee</DialogTitle>
+            <DialogTitle className="text-blue-600">Add employee</DialogTitle>
           </DialogHeader>
           
           <div className="py-4">
-            <h3 className="font-medium mb-3">Basic Details</h3>
+            <h3 className="font-medium mb-3 text-blue-700">Basic Details</h3>
             
             <div className="grid grid-cols-2 gap-4">
               <FormField
@@ -184,6 +220,7 @@ const SetupEmployees: React.FC = () => {
                 onChange={handleInputChange}
                 error={formErrors.firstName}
                 required
+                icon={<User className="h-4 w-4 text-gray-500" />}
               />
               
               <FormField
@@ -194,6 +231,7 @@ const SetupEmployees: React.FC = () => {
                 onChange={handleInputChange}
                 error={formErrors.lastName}
                 required
+                icon={<User className="h-4 w-4 text-gray-500" />}
               />
             </div>
             
@@ -210,16 +248,36 @@ const SetupEmployees: React.FC = () => {
                 { label: 'Other', value: 'other' }
               ]}
               error={formErrors.gender}
+              icon={<User className="h-4 w-4 text-gray-500" />}
             />
             
-            <FormField
-              label="Date of Birth"
-              name="dateOfBirth"
-              type="date"
-              value={newEmployee.dateOfBirth}
-              onChange={handleInputChange}
-              error={formErrors.dateOfBirth}
-            />
+            <div className="my-4">
+              <label className="block text-sm font-medium text-gray-700 mb-1">Date of Birth</label>
+              <Popover>
+                <PopoverTrigger asChild>
+                  <Button
+                    variant={"outline"}
+                    className={cn(
+                      "w-full justify-start text-left font-normal",
+                      !dateOfBirth && "text-muted-foreground border-gray-300"
+                    )}
+                  >
+                    <CalendarIcon className="mr-2 h-4 w-4 text-gray-500" />
+                    {dateOfBirth ? format(dateOfBirth, 'PPP') : <span>Pick a date</span>}
+                  </Button>
+                </PopoverTrigger>
+                <PopoverContent className="w-auto p-0" align="start">
+                  <Calendar
+                    mode="single"
+                    selected={dateOfBirth}
+                    onSelect={handleDateOfBirthChange}
+                    initialFocus
+                    className="p-3 pointer-events-auto"
+                  />
+                </PopoverContent>
+              </Popover>
+              {formErrors.dateOfBirth && <p className="text-red-500 text-xs mt-1">{formErrors.dateOfBirth}</p>}
+            </div>
             
             <FormField
               label="Official Mail"
@@ -230,19 +288,38 @@ const SetupEmployees: React.FC = () => {
               onChange={handleInputChange}
               error={formErrors.email}
               required
+              icon={<Mail className="h-4 w-4 text-gray-500" />}
             />
             
-            <h3 className="font-medium mb-3 mt-6">Employment Details</h3>
+            <h3 className="font-medium mb-3 mt-6 text-blue-700">Employment Details</h3>
             
-            <FormField
-              label="Joining Date"
-              name="joiningDate"
-              type="date"
-              value={newEmployee.joiningDate}
-              onChange={handleInputChange}
-              error={formErrors.joiningDate}
-              required
-            />
+            <div className="my-4">
+              <label className="block text-sm font-medium text-gray-700 mb-1">Joining Date</label>
+              <Popover>
+                <PopoverTrigger asChild>
+                  <Button
+                    variant={"outline"}
+                    className={cn(
+                      "w-full justify-start text-left font-normal",
+                      !joiningDate && "text-muted-foreground border-gray-300"
+                    )}
+                  >
+                    <CalendarIcon className="mr-2 h-4 w-4 text-gray-500" />
+                    {joiningDate ? format(joiningDate, 'PPP') : <span>Pick a date</span>}
+                  </Button>
+                </PopoverTrigger>
+                <PopoverContent className="w-auto p-0" align="start">
+                  <Calendar
+                    mode="single"
+                    selected={joiningDate}
+                    onSelect={handleJoiningDateChange}
+                    initialFocus
+                    className="p-3 pointer-events-auto"
+                  />
+                </PopoverContent>
+              </Popover>
+              {formErrors.joiningDate && <p className="text-red-500 text-xs mt-1">{formErrors.joiningDate}</p>}
+            </div>
             
             <FormField
               label="Job Title"
@@ -252,6 +329,7 @@ const SetupEmployees: React.FC = () => {
               onChange={handleInputChange}
               error={formErrors.jobTitle}
               required
+              icon={<Briefcase className="h-4 w-4 text-gray-500" />}
             />
             
             <FormField
@@ -267,12 +345,23 @@ const SetupEmployees: React.FC = () => {
               }))}
               error={formErrors.department}
               required
+              icon={<Building className="h-4 w-4 text-gray-500" />}
             />
           </div>
           
           <div className="flex justify-end space-x-3">
-            <Button variant="outline" onClick={() => setShowAddDialog(false)}>Cancel</Button>
-            <Button onClick={handleAddEmployee}>Save</Button>
+            <Button variant="outline" onClick={() => {
+              setShowAddDialog(false);
+              resetForm();
+            }}>
+              Cancel
+            </Button>
+            <Button 
+              onClick={handleAddEmployee}
+              className="bg-blue-600 hover:bg-blue-700 text-white"
+            >
+              Save
+            </Button>
           </div>
         </DialogContent>
       </Dialog>

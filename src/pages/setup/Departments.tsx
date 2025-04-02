@@ -7,7 +7,7 @@ import { useNavigate } from 'react-router-dom';
 import { toast } from '@/components/ui/use-toast';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import FormField from '@/components/FormField';
-import { Plus } from 'lucide-react';
+import { Plus, Users, Building, Mail } from 'lucide-react';
 
 interface Department {
   id: string;
@@ -85,46 +85,63 @@ const SetupDepartments: React.FC = () => {
   };
 
   return (
-    <div className="flex min-h-screen bg-gray-100">
+    <div className="flex min-h-screen bg-gray-50">
       <OnboardingSidebar currentStep="departments" />
       
       <div className="flex-1 p-8">
         <div className="mb-8 flex justify-between items-center">
           <div>
-            <h1 className="text-2xl font-bold mb-1">Set Up Your Departments</h1>
+            <h1 className="text-2xl font-bold mb-1 text-blue-600">Set Up Your Departments</h1>
             <p className="text-gray-600">Create and organize your company's department structure</p>
           </div>
           
           <div className="space-x-3">
             <Button variant="outline" onClick={handleSkip}>Skip</Button>
-            <Button onClick={handleSaveAndNext}>Save & Next</Button>
+            <Button 
+              onClick={handleSaveAndNext}
+              className="bg-blue-600 hover:bg-blue-700 text-white"
+            >
+              Save & Next
+            </Button>
           </div>
         </div>
         
-        <div className="grid grid-cols-2 gap-4">
+        <div className="grid grid-cols-2 gap-5">
           {departments.map(dept => (
-            <div key={dept.id} className="border border-gray-200 rounded-lg p-4 bg-white">
-              <h3 className="font-medium text-lg">{dept.name}</h3>
-              <p className="text-gray-600 text-sm">{dept.email}</p>
+            <div key={dept.id} className="border border-blue-100 rounded-lg p-5 bg-white shadow-sm hover:shadow-md transition-shadow">
+              <div className="flex items-start gap-3">
+                <div className="p-2 bg-blue-50 rounded-md">
+                  <Building className="h-5 w-5 text-blue-600" />
+                </div>
+                <div>
+                  <h3 className="font-medium text-lg text-blue-700">{dept.name}</h3>
+                  <div className="flex items-center text-gray-500 text-sm mt-1">
+                    <Mail className="h-3.5 w-3.5 mr-1" />
+                    <span>{dept.email || 'No email set'}</span>
+                  </div>
+                </div>
+              </div>
             </div>
           ))}
           
           <div 
-            className="border border-dashed border-gray-300 rounded-lg p-4 flex items-center justify-center cursor-pointer hover:bg-gray-50"
+            className="border border-dashed border-blue-200 rounded-lg p-5 flex items-center justify-center cursor-pointer hover:bg-blue-50 transition-colors"
             onClick={() => setShowAddDialog(true)}
           >
             <div className="text-center">
-              <Plus className="mx-auto text-gray-400 mb-2" />
-              <span className="text-gray-600">Add Department</span>
+              <div className="bg-blue-50 rounded-full p-3 mx-auto mb-3 w-fit">
+                <Plus className="h-5 w-5 text-blue-600" />
+              </div>
+              <span className="text-blue-600 font-medium">Add Department</span>
             </div>
           </div>
         </div>
       </div>
       
       <Dialog open={showAddDialog} onOpenChange={setShowAddDialog}>
-        <DialogContent>
+        <DialogContent className="sm:max-w-md" onClick={(e) => e.stopPropagation()}>
           <DialogHeader>
-            <DialogTitle>Add Department</DialogTitle>
+            <DialogTitle className="text-blue-600">Add Department</DialogTitle>
           </DialogHeader>
           
           <div className="py-4">
@@ -136,16 +153,18 @@ const SetupDepartments: React.FC = () => {
               onChange={handleInputChange}
               error={formErrors.name}
               required
+              icon={<Building className="h-4 w-4 text-gray-500" />}
             />
             
             <FormField
               label="Group email"
               name="email"
               type="email"
-              placeholder="person@example.com"
+              placeholder="department@example.com"
               value={newDepartment.email}
               onChange={handleInputChange}
               error={formErrors.email}
+              icon={<Mail className="h-4 w-4 text-gray-500" />}
             />
             
             <FormField
@@ -155,12 +174,18 @@ const SetupDepartments: React.FC = () => {
               value={newDepartment.head}
               onChange={handleInputChange}
               error={formErrors.head}
+              icon={<Users className="h-4 w-4 text-gray-500" />}
             />
           </div>
           
           <div className="flex justify-end space-x-3">
             <Button variant="outline" onClick={() => setShowAddDialog(false)}>Cancel</Button>
-            <Button onClick={handleAddDepartment}>Save</Button>
+            <Button 
+              onClick={handleAddDepartment}
+              className="bg-blue-600 hover:bg-blue-700 text-white"
+            >
+              Save
+            </Button>
           </div>
         </DialogContent>
       </Dialog>
