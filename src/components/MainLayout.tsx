@@ -1,4 +1,3 @@
-
 import React, { ReactNode, useState } from 'react';
 import { Link, useLocation } from 'react-router-dom';
 import Logo from './Logo';
@@ -220,7 +219,7 @@ const MainLayout: React.FC<MainLayoutProps> = ({ children }) => {
                     <Avatar className="h-8 w-8 bg-blue-500 text-white">
                       <AvatarFallback>{initials}</AvatarFallback>
                     </Avatar>
-                    <span className="text-sm text-gray-700">{initials}</span>
+                    <span className="text-sm text-blue-500">{initials}</span>
                   </button>
                 </DropdownMenuTrigger>
                 <DropdownMenuContent align="end" className="w-56">
