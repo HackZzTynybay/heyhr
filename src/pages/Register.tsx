@@ -23,6 +23,7 @@ const Register: React.FC = () => {
   });
   
   const [errors, setErrors] = useState<Record<string, string>>({});
+  const [isLoading, setIsLoading] = useState(false);
   
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value } = e.target;
@@ -61,7 +62,7 @@ const Register: React.FC = () => {
     }
   };
   
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     
     const validation = validateCompanyForm(formData);
@@ -71,7 +72,15 @@ const Register: React.FC = () => {
       return;
     }
     
-    registerUser(formData);
+    setIsLoading(true);
+    
+    try {
+      await registerUser(formData);
+    } catch (error) {
+      // Error handling is done in the registerUser function
+    } finally {
+      setIsLoading(false);
+    }
   };
   
   const employeeOptions = [
@@ -181,8 +190,12 @@ const Register: React.FC = () => {
           </div>
           {errors.termsAgreed && <p className="text-red-500 text-sm mb-4 -mt-4">{errors.termsAgreed}</p>}
           
-          <Button type="submit" className="w-full bg-brand-blue hover:bg-blue-600">
-            Create Account
+          <Button 
+            type="submit" 
+            className="w-full bg-brand-blue hover:bg-blue-600"
+            disabled={isLoading}
+          >
+            {isLoading ? 'Creating Account...' : 'Create Account'}
           </Button>
           
           <div className="text-center mt-4 text-sm">

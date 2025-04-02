@@ -1,5 +1,5 @@
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useParams, useNavigate, useSearchParams } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -21,10 +21,23 @@ import { Avatar, AvatarFallback } from '@/components/ui/avatar';
 
 interface Employee {
   id: string;
-  name: string;
-  title: string;
-  initials: string;
+  first_name: string;
+  last_name: string;
+  email: string;
+  job_title: string;
 }
+
+interface Department {
+  id: string;
+  name: string;
+  code: string;
+  email: string;
+  lead_id: string;
+  lead_name: string;
+  subDepartment?: string;
+}
+
+const API_URL = "http://localhost:3000/api"; // Update with your actual API URL
 
 const DepartmentDetails: React.FC = () => {
   const { id } = useParams<{ id: string }>();
@@ -32,22 +45,68 @@ const DepartmentDetails: React.FC = () => {
   const isEditing = searchParams.get('edit') === 'true';
   const navigate = useNavigate();
   
-  // Mock data for the department
-  const [department, setDepartment] = useState({
-    id: id || 'dept-1',
-    name: 'Human Resources',
-    code: 'HR-001',
-    head: 'Cody Fisher',
-    email: 'hr@company.com',
+  const [department, setDepartment] = useState<Department>({
+    id: id || '',
+    name: '',
+    code: '',
+    lead_id: '',
+    lead_name: '',
+    email: '',
     subDepartment: ''
   });
   
-  const employees: Employee[] = [
-    { id: 'emp-1', name: 'Jerome Bell', title: 'Tech Lead', initials: 'JB' },
-    { id: 'emp-2', name: 'Jerome Bell', title: 'Tech Lead', initials: 'JB' },
-    { id: 'emp-3', name: 'Jerome Bell', title: 'Tech Lead', initials: 'JB' },
-    { id: 'emp-4', name: 'Jerome Bell', title: 'Tech Lead', initials: 'JB' }
-  ];
+  const [employees, setEmployees] = useState<Employee[]>([]);
+  const [isLoading, setIsLoading] = useState(true);
+  
+  useEffect(() => {
+    const fetchDepartmentData = async () => {
+      if (!id) return;
+      
+      try {
+        setIsLoading(true);
+        
+        // Fetch department employees
+        const response = await fetch(`${API_URL}/departments/${id}/employees`, {
+          headers: {
+            'Authorization': `Bearer ${localStorage.getItem('token')}`
+          }
+        });
+        
+        if (!response.ok) {
+          throw new Error('Failed to fetch department data');
+        }
+        
+        const data = await response.json();
+        
+        if (data.success && data.data) {
+          // Set employees
+          setEmployees(data.data);
+          
+          // For demo purposes, we're assuming department details would be fetched from another endpoint
+          // In a real app, you would fetch department details from a specific endpoint
+          // For now, we'll use mock data based on the ID
+          setDepartment({
+            id: id,
+            name: 'Human Resources', // This would come from the API
+            code: 'HR-001',
+            lead_id: data.data[0]?.id || '',
+            lead_name: data.data[0] ? `${data.data[0].first_name} ${data.data[0].last_name}` : '',
+            email: 'hr@company.com'
+          });
+        }
+      } catch (error) {
+        toast({
+          title: "Error",
+          description: "Failed to load department data",
+          variant: "destructive"
+        });
+      } finally {
+        setIsLoading(false);
+      }
+    };
+    
+    fetchDepartmentData();
+  }, [id]);
   
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value } = e.target;
@@ -62,14 +121,49 @@ const DepartmentDetails: React.FC = () => {
     navigate('/organization/departments');
   };
   
-  const handleSave = () => {
-    // In a real app, you would send this to an API
-    toast({
-      title: "Department updated",
-      description: `${department.name} has been successfully updated.`
-    });
-    navigate('/organization/departments');
+  const handleSave = async () => {
+    try {
+      // If we're assigning a lead, make the API call
+      if (department.lead_id) {
+        const response = await fetch(`${API_URL}/departments/assignLead`, {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            'Authorization': `Bearer ${localStorage.getItem('token')}`
+          },
+          body: JSON.stringify({
+            lead_id: department.lead_id,
+            department_id: department.id
+          })
+        });
+        
+        if (!response.ok) {
+          throw new Error('Failed to update department');
+        }
+      }
+      
+      toast({
+        title: "Department updated",
+        description: `${department.name} has been successfully updated.`
+      });
+      
+      navigate('/organization/departments');
+    } catch (error) {
+      toast({
+        title: "Error",
+        description: "Failed to update department",
+        variant: "destructive"
+      });
+    }
   };
+  
+  if (isLoading) {
+    return (
+      <div className="flex justify-center items-center h-64">
+        <p>Loading department data...</p>
+      </div>
+    );
+  }
   
   return (
     <div className="space-y-4">
@@ -114,11 +208,11 @@ const DepartmentDetails: React.FC = () => {
                     <div className="flex items-center">
                       <Avatar className="h-6 w-6 mr-2">
                         <AvatarFallback className="bg-gray-100 text-gray-600 text-xs">
-                          {department.head.split(' ').map(part => part[0]).join('')}
+                          {department.lead_name ? department.lead_name.split(' ').map(part => part[0]).join('') : 'NA'}
                         </AvatarFallback>
                       </Avatar>
                       <div className="text-sm text-gray-900">
-                        {department.head}
+                        {department.lead_name || 'Not assigned'}
                       </div>
                     </div>
                   </td>
@@ -158,12 +252,29 @@ const DepartmentDetails: React.FC = () => {
                 
                 <div className="space-y-2">
                   <label className="text-sm font-medium">Department Head</label>
-                  <Input
-                    name="head"
-                    value={department.head}
-                    onChange={handleInputChange}
+                  <Select 
+                    value={department.lead_id} 
+                    onValueChange={(value) => {
+                      const selectedEmployee = employees.find(emp => emp.id === value);
+                      setDepartment(prev => ({ 
+                        ...prev, 
+                        lead_id: value,
+                        lead_name: selectedEmployee ? `${selectedEmployee.first_name} ${selectedEmployee.last_name}` : ''
+                      }));
+                    }}
                     disabled={!isEditing}
-                  />
+                  >
+                    <SelectTrigger>
+                      <SelectValue placeholder="Select employee" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      {employees.map(employee => (
+                        <SelectItem key={employee.id} value={employee.id}>
+                          {employee.first_name} {employee.last_name}
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
                 </div>
                 
                 <div className="space-y-2">
@@ -215,19 +326,23 @@ const DepartmentDetails: React.FC = () => {
               
               <TabsContent value="employees">
                 <div className="space-y-3 max-h-96 overflow-y-auto">
-                  {employees.map((employee) => (
-                    <div key={employee.id} className="flex items-center gap-3 py-2">
-                      <Avatar>
-                        <AvatarFallback className="bg-blue-100 text-blue-600">
-                          {employee.initials}
-                        </AvatarFallback>
-                      </Avatar>
-                      <div>
-                        <p className="font-medium">{employee.name}</p>
-                        <p className="text-xs text-gray-600">{employee.title}</p>
+                  {employees.length > 0 ? (
+                    employees.map((employee) => (
+                      <div key={employee.id} className="flex items-center gap-3 py-2">
+                        <Avatar>
+                          <AvatarFallback className="bg-blue-100 text-blue-600">
+                            {`${employee.first_name[0]}${employee.last_name[0]}`}
+                          </AvatarFallback>
+                        </Avatar>
+                        <div>
+                          <p className="font-medium">{employee.first_name} {employee.last_name}</p>
+                          <p className="text-xs text-gray-600">{employee.job_title}</p>
+                        </div>
                       </div>
-                    </div>
-                  ))}
+                    ))
+                  ) : (
+                    <p className="text-gray-500 text-center py-4">No employees in this department</p>
+                  )}
                 </div>
               </TabsContent>
             </Tabs>

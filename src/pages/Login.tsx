@@ -15,6 +15,7 @@ const Login: React.FC = () => {
   });
   
   const [errors, setErrors] = useState<Record<string, string>>({});
+  const [isLoading, setIsLoading] = useState(false);
   
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value } = e.target;
@@ -22,9 +23,14 @@ const Login: React.FC = () => {
       ...formData,
       [name]: value
     });
+    
+    // Clear error when typing
+    if (errors[name]) {
+      setErrors(prev => ({ ...prev, [name]: '' }));
+    }
   };
   
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     
     // Simple validation
@@ -43,7 +49,15 @@ const Login: React.FC = () => {
       return;
     }
     
-    loginUser(formData.email, formData.password);
+    setIsLoading(true);
+    
+    try {
+      await loginUser(formData.email, formData.password);
+    } catch (error) {
+      // Error handling is done in the loginUser function
+    } finally {
+      setIsLoading(false);
+    }
   };
 
   return (
@@ -80,8 +94,12 @@ const Login: React.FC = () => {
             </Link>
           </div>
           
-          <Button type="submit" className="w-full bg-brand-blue hover:bg-blue-600">
-            Log in
+          <Button 
+            type="submit" 
+            className="w-full bg-brand-blue hover:bg-blue-600"
+            disabled={isLoading}
+          >
+            {isLoading ? 'Logging in...' : 'Log in'}
           </Button>
           
           <div className="text-center mt-4 text-sm">

@@ -1,3 +1,4 @@
+
 import React, { createContext, useContext, useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { useToast } from "@/components/ui/use-toast";
@@ -6,9 +7,9 @@ interface AuthContextType {
   isAuthenticated: boolean;
   currentUser: any;
   registerUser: (userData: any) => void;
-  verifyEmail: (email: string) => void;
+  verifyEmail: (token: string) => void;
   updateEmail: (oldEmail: string, newEmail: string) => void;
-  setPassword: (email: string, password: string) => void;
+  setPassword: (token: string, password: string) => void;
   completeOnboarding: () => void;
   loginUser: (email: string, password: string) => void;
   logoutUser: () => void;
@@ -18,6 +19,9 @@ interface AuthContextType {
   onboardingData: any;
   updateOnboardingData: (data: any) => void;
 }
+
+// API base URL
+const API_URL = "http://localhost:3000/api"; // Update with your actual API URL
 
 const defaultOnboardingData = {
   company: {
@@ -85,13 +89,17 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   const [onboardingStep, setOnboardingStep] = useState(0);
   const [isOnboarding, setIsOnboarding] = useState(false);
   const [onboardingData, setOnboardingData] = useState(defaultOnboardingData);
+  const [token, setToken] = useState<string | null>(null);
   const navigate = useNavigate();
   const { toast } = useToast();
 
   // Check localStorage on initial load
   useEffect(() => {
+    const storedToken = localStorage.getItem("token");
     const user = localStorage.getItem("currentUser");
-    if (user) {
+    
+    if (storedToken && user) {
+      setToken(storedToken);
       setCurrentUser(JSON.parse(user));
       setIsAuthenticated(true);
     }
@@ -109,45 +117,115 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     }
   }, []);
 
-  const registerUser = (userData: any) => {
-    // For MVP, store in localStorage
-    const newOnboardingData = {
-      ...onboardingData,
-      company: {
-        name: userData.companyName,
-        email: userData.workEmail,
-        phone: userData.phoneNumber,
-        identificationNumber: userData.companyId,
-        numberOfEmployees: userData.employees,
-      },
-      user: {
-        fullName: userData.fullName,
-        jobTitle: userData.jobTitle,
+  const registerUser = async (userData: any) => {
+    try {
+      const response = await fetch(`${API_URL}/auth/register`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          full_name: userData.fullName,
+          job_title: userData.jobTitle,
+          email: userData.workEmail,
+          company_name: userData.companyName,
+          company_identification_number: userData.companyId,
+          phone_number: userData.phoneNumber,
+          work_email: userData.workEmail,
+          num_employees: parseInt(userData.employees)
+        })
+      });
+      
+      const data = await response.json();
+      
+      if (!response.ok) {
+        throw new Error(data.message || 'Registration failed');
       }
-    };
-    
-    setOnboardingData(newOnboardingData);
-    localStorage.setItem("onboardingData", JSON.stringify(newOnboardingData));
-    localStorage.setItem("onboardingInProgress", JSON.stringify({ step: 1, email: userData.workEmail }));
-    setIsOnboarding(true);
-    setOnboardingStep(1);
-    navigate("/verify-email");
+      
+      // Store verification token in localStorage for demo purposes
+      // In a real app, this would be sent to the user's email
+      localStorage.setItem("verificationToken", data.verificationToken);
+      
+      const newOnboardingData = {
+        ...onboardingData,
+        company: {
+          name: userData.companyName,
+          email: userData.workEmail,
+          phone: userData.phoneNumber,
+          identificationNumber: userData.companyId,
+          numberOfEmployees: userData.employees,
+        },
+        user: {
+          fullName: userData.fullName,
+          jobTitle: userData.jobTitle,
+        }
+      };
+      
+      setOnboardingData(newOnboardingData);
+      localStorage.setItem("onboardingData", JSON.stringify(newOnboardingData));
+      localStorage.setItem("onboardingInProgress", JSON.stringify({ step: 1, email: userData.workEmail }));
+      setIsOnboarding(true);
+      setOnboardingStep(1);
+      
+      toast({
+        title: "Registration successful",
+        description: "Please check your email for verification."
+      });
+      
+      navigate("/verify-email");
+    } catch (error: any) {
+      toast({
+        title: "Registration failed",
+        description: error.message,
+        variant: "destructive"
+      });
+    }
   };
 
-  const verifyEmail = (email: string) => {
-    const onboarding = localStorage.getItem("onboardingInProgress");
-    if (onboarding) {
-      localStorage.setItem("onboardingInProgress", JSON.stringify({ 
-        ...JSON.parse(onboarding), 
-        step: 2, 
-        emailVerified: true 
-      }));
-      setOnboardingStep(2);
-      navigate("/set-password");
+  const verifyEmail = async (token: string) => {
+    try {
+      const response = await fetch(`${API_URL}/auth/verify/${token}`, {
+        method: 'GET'
+      });
+      
+      const data = await response.json();
+      
+      if (!response.ok) {
+        throw new Error(data.message || 'Email verification failed');
+      }
+      
+      // Store the JWT token
+      localStorage.setItem("token", data.token);
+      setToken(data.token);
+      
+      const onboarding = localStorage.getItem("onboardingInProgress");
+      if (onboarding) {
+        localStorage.setItem("onboardingInProgress", JSON.stringify({ 
+          ...JSON.parse(onboarding), 
+          step: 2, 
+          emailVerified: true,
+          token: data.token
+        }));
+        setOnboardingStep(2);
+        
+        toast({
+          title: "Email verified",
+          description: "You can now set your password."
+        });
+        
+        navigate("/set-password");
+      }
+    } catch (error: any) {
+      toast({
+        title: "Verification failed",
+        description: error.message,
+        variant: "destructive"
+      });
     }
   };
 
   const updateEmail = (oldEmail: string, newEmail: string) => {
+    // For MVP, just update the email in the local storage
     const updatedOnboardingData = { ...onboardingData };
     updatedOnboardingData.company.email = newEmail;
     
@@ -169,26 +247,44 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     });
   };
 
-  const setPassword = (email: string, password: string) => {
-    const onboarding = localStorage.getItem("onboardingInProgress");
-    if (onboarding) {
-      localStorage.setItem("onboardingInProgress", JSON.stringify({ 
-        ...JSON.parse(onboarding), 
-        step: 3,
-        passwordSet: true
-      }));
-      setOnboardingStep(3);
-
-      // Store password securely (for MVP just in localStorage)
-      const users = JSON.parse(localStorage.getItem("users") || "[]");
-      users.push({
-        email,
-        password,
-        userData: onboardingData
+  const setPassword = async (token: string, password: string) => {
+    try {
+      const response = await fetch(`${API_URL}/auth/change-password/${token}`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ password })
       });
-      localStorage.setItem("users", JSON.stringify(users));
       
-      navigate("/setup/departments");
+      const data = await response.json();
+      
+      if (!response.ok) {
+        throw new Error(data.message || 'Password update failed');
+      }
+      
+      const onboarding = localStorage.getItem("onboardingInProgress");
+      if (onboarding) {
+        localStorage.setItem("onboardingInProgress", JSON.stringify({ 
+          ...JSON.parse(onboarding), 
+          step: 3,
+          passwordSet: true
+        }));
+        setOnboardingStep(3);
+        
+        toast({
+          title: "Password set",
+          description: "Your password has been set successfully."
+        });
+        
+        navigate("/setup/departments");
+      }
+    } catch (error: any) {
+      toast({
+        title: "Password update failed",
+        description: error.message,
+        variant: "destructive"
+      });
     }
   };
 
@@ -222,26 +318,61 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     });
   };
 
-  const loginUser = (email: string, password: string) => {
-    // For MVP, check localStorage
-    const users = JSON.parse(localStorage.getItem("users") || "[]");
-    const user = users.find((u: any) => u.email === email && u.password === password);
-    
-    if (user) {
-      localStorage.setItem("currentUser", JSON.stringify({
-        email: user.email,
-        userData: user.userData,
-      }));
-      setCurrentUser({
-        email: user.email,
-        userData: user.userData,
+  const loginUser = async (email: string, password: string) => {
+    try {
+      const response = await fetch(`${API_URL}/auth/login`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ email, password })
       });
+      
+      const data = await response.json();
+      
+      if (!response.ok) {
+        throw new Error(data.message || 'Login failed');
+      }
+      
+      // Store the token in localStorage
+      localStorage.setItem("token", data.token);
+      setToken(data.token);
+      
+      // Fetch user data with the token
+      const userResponse = await fetch(`${API_URL}/permissions/permissionDetails`, {
+        headers: {
+          'Authorization': `Bearer ${data.token}`
+        }
+      });
+      
+      const userData = await userResponse.json();
+      
+      if (!userResponse.ok) {
+        throw new Error(userData.message || 'Failed to fetch user data');
+      }
+      
+      const user = {
+        id: userData.message.userId,
+        email: userData.message.email,
+        roleId: userData.message.roleId,
+        roleName: userData.message.roleName,
+        companyId: userData.message.companyId
+      };
+      
+      localStorage.setItem("currentUser", JSON.stringify(user));
+      setCurrentUser(user);
       setIsAuthenticated(true);
+      
+      toast({
+        title: "Login successful",
+        description: "Welcome back!"
+      });
+      
       navigate("/dashboard");
-    } else {
+    } catch (error: any) {
       toast({
         title: "Login failed",
-        description: "Invalid email or password",
+        description: error.message,
         variant: "destructive"
       });
     }
@@ -250,6 +381,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   const logoutUser = () => {
     // Clear all authentication and onboarding data
     localStorage.removeItem("currentUser");
+    localStorage.removeItem("token");
     localStorage.removeItem("onboardingInProgress");
     localStorage.removeItem("onboardingData");
     
@@ -259,6 +391,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     setIsOnboarding(false);
     setOnboardingStep(0);
     setOnboardingData(defaultOnboardingData);
+    setToken(null);
     
     // Navigate to login page
     navigate("/login");

@@ -6,13 +6,16 @@ import { Eye, EyeOff, Check, AlertCircle } from 'lucide-react';
 import OnboardingLayout from '@/components/OnboardingLayout';
 import { useAuth } from '@/context/AuthContext';
 import { validatePassword } from '@/lib/validation';
-import { Link } from 'react-router-dom';
+import { Link, useSearchParams } from 'react-router-dom';
 
 const SetPassword: React.FC = () => {
   const { onboardingData, setPassword } = useAuth();
+  const [searchParams] = useSearchParams();
+  const urlToken = searchParams.get('token');
   
   const [password, setPasswordValue] = useState('');
   const [showPassword, setShowPassword] = useState(false);
+  const [isLoading, setIsLoading] = useState(false);
   
   const email = onboardingData.company.email;
   
@@ -45,11 +48,28 @@ const SetPassword: React.FC = () => {
     setPasswordValue(e.target.value);
   };
   
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     
-    if (passwordValidation.isValid) {
-      setPassword(email, password);
+    if (!passwordValidation.isValid) {
+      return;
+    }
+    
+    setIsLoading(true);
+    
+    try {
+      // Use token from URL or from localStorage (for demo purposes)
+      const token = urlToken || localStorage.getItem("verificationToken");
+      
+      if (!token) {
+        throw new Error("No verification token found");
+      }
+      
+      await setPassword(token, password);
+    } catch (error) {
+      // Error handling is done in the setPassword function
+    } finally {
+      setIsLoading(false);
     }
   };
 
@@ -130,9 +150,9 @@ const SetPassword: React.FC = () => {
           <Button 
             type="submit"
             className="w-full bg-brand-blue hover:bg-blue-600"
-            disabled={!passwordValidation.isValid}
+            disabled={!passwordValidation.isValid || isLoading}
           >
-            Create Password
+            {isLoading ? 'Creating Password...' : 'Create Password'}
           </Button>
           
           <div className="text-center mt-4 text-sm">

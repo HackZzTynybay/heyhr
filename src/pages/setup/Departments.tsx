@@ -1,5 +1,5 @@
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Button } from '@/components/ui/button';
 import { useAuth } from '@/context/AuthContext';
 import OnboardingSidebar from '@/components/OnboardingSidebar';
@@ -13,8 +13,10 @@ interface Department {
   id: string;
   name: string;
   email: string;
-  head?: string;
+  lead_id?: string;
 }
+
+const API_URL = "http://localhost:3000/api"; // Update with your actual API URL
 
 const SetupDepartments: React.FC = () => {
   const { onboardingData, updateOnboardingData, setOnboardingStep } = useAuth();
@@ -22,8 +24,48 @@ const SetupDepartments: React.FC = () => {
   
   const [departments, setDepartments] = useState<Department[]>(onboardingData.departments || []);
   const [showAddDialog, setShowAddDialog] = useState(false);
-  const [newDepartment, setNewDepartment] = useState({ name: '', email: '', head: '' });
+  const [newDepartment, setNewDepartment] = useState({ name: '', email: '', lead_id: '' });
   const [formErrors, setFormErrors] = useState<Record<string, string>>({});
+  const [isLoading, setIsLoading] = useState(false);
+  
+  useEffect(() => {
+    const fetchDepartments = async () => {
+      try {
+        setIsLoading(true);
+        
+        const token = localStorage.getItem('token');
+        
+        if (!token) {
+          // If no token, just use the local data
+          return;
+        }
+        
+        const response = await fetch(`${API_URL}/departments/getdepartments`, {
+          headers: {
+            'Authorization': `Bearer ${token}`
+          }
+        });
+        
+        if (!response.ok) {
+          throw new Error('Failed to fetch departments');
+        }
+        
+        const data = await response.json();
+        
+        if (data.success && data.data) {
+          setDepartments(data.data);
+          updateOnboardingData({ departments: data.data });
+        }
+      } catch (error) {
+        // Just continue with local data
+        console.error('Error fetching departments:', error);
+      } finally {
+        setIsLoading(false);
+      }
+    };
+    
+    fetchDepartments();
+  }, [updateOnboardingData]);
   
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value } = e.target;
@@ -45,7 +87,7 @@ const SetupDepartments: React.FC = () => {
     return { isValid: Object.keys(errors).length === 0, errors };
   };
   
-  const handleAddDepartment = () => {
+  const handleAddDepartment = async () => {
     const validation = validateDepartmentForm();
     
     if (!validation.isValid) {
@@ -53,25 +95,74 @@ const SetupDepartments: React.FC = () => {
       return;
     }
     
-    const departmentId = `dept-${Date.now()}`;
-    const department = {
-      id: departmentId,
-      name: newDepartment.name,
-      email: newDepartment.email,
-      head: newDepartment.head
-    };
+    setIsLoading(true);
     
-    const updatedDepartments = [...departments, department];
-    setDepartments(updatedDepartments);
-    updateOnboardingData({ departments: updatedDepartments });
-    
-    setNewDepartment({ name: '', email: '', head: '' });
-    setShowAddDialog(false);
-    
-    toast({
-      title: 'Department added',
-      description: `${department.name} department has been added.`
-    });
+    try {
+      const token = localStorage.getItem('token');
+      
+      // Make API request to create department
+      const response = await fetch(`${API_URL}/departments/createdepartments`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${token}`
+        },
+        body: JSON.stringify({
+          department_name: newDepartment.name,
+          group_email: newDepartment.email,
+          lead_id: newDepartment.lead_id || null
+        })
+      });
+      
+      if (!response.ok) {
+        throw new Error('Failed to create department');
+      }
+      
+      const data = await response.json();
+      
+      // Add the new department to state
+      const newDept = {
+        id: data.department.id,
+        name: data.department.name,
+        email: data.department.email,
+        lead_id: data.department.lead_id
+      };
+      
+      const updatedDepartments = [...departments, newDept];
+      setDepartments(updatedDepartments);
+      updateOnboardingData({ departments: updatedDepartments });
+      
+      setNewDepartment({ name: '', email: '', lead_id: '' });
+      setShowAddDialog(false);
+      
+      toast({
+        title: 'Department added',
+        description: `${newDept.name} department has been added.`
+      });
+    } catch (error) {
+      // If API call fails, just add to local state for demo purposes
+      const departmentId = `dept-${Date.now()}`;
+      const department = {
+        id: departmentId,
+        name: newDepartment.name,
+        email: newDepartment.email,
+        lead_id: newDepartment.lead_id
+      };
+      
+      const updatedDepartments = [...departments, department];
+      setDepartments(updatedDepartments);
+      updateOnboardingData({ departments: updatedDepartments });
+      
+      setNewDepartment({ name: '', email: '', lead_id: '' });
+      setShowAddDialog(false);
+      
+      toast({
+        title: 'Department added (offline mode)',
+        description: `${department.name} department has been added locally.`
+      });
+    } finally {
+      setIsLoading(false);
+    }
   };
   
   const handleSaveAndNext = () => {
@@ -100,6 +191,7 @@ const SetupDepartments: React.FC = () => {
             <Button 
               onClick={handleSaveAndNext}
               className="bg-blue-600 hover:bg-blue-700 text-white"
+              disabled={isLoading}
             >
               Save & Next
             </Button>
@@ -169,11 +261,11 @@ const SetupDepartments: React.FC = () => {
             
             <FormField
               label="Department Head"
-              name="head"
+              name="lead_id"
               placeholder="Search employee"
-              value={newDepartment.head}
+              value={newDepartment.lead_id}
               onChange={handleInputChange}
-              error={formErrors.head}
+              error={formErrors.lead_id}
               icon={<Users className="h-4 w-4 text-gray-500" />}
             />
           </div>
@@ -183,8 +275,9 @@ const SetupDepartments: React.FC = () => {
             <Button 
               onClick={handleAddDepartment}
               className="bg-blue-600 hover:bg-blue-700 text-white"
+              disabled={isLoading}
             >
-              Save
+              {isLoading ? 'Saving...' : 'Save'}
             </Button>
           </div>
         </DialogContent>

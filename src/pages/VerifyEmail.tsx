@@ -1,23 +1,46 @@
 
-import React from 'react';
+import React, { useEffect } from 'react';
 import { Button } from '@/components/ui/button';
-import { Link } from 'react-router-dom';
+import { Link, useSearchParams } from 'react-router-dom';
 import OnboardingLayout from '@/components/OnboardingLayout';
 import { useAuth } from '@/context/AuthContext';
+import { toast } from '@/components/ui/use-toast';
 
 const VerifyEmail: React.FC = () => {
   const { verifyEmail, onboardingData } = useAuth();
+  const [searchParams] = useSearchParams();
+  const token = searchParams.get('token');
   
   const email = onboardingData.company.email;
   
+  useEffect(() => {
+    // If token is in URL, verify email automatically
+    if (token) {
+      verifyEmail(token);
+    }
+  }, [token, verifyEmail]);
+  
   const handleResendEmail = () => {
     // In a real app, this would trigger an API call to resend the verification email
-    alert("Verification email resent. Please check your inbox.");
+    toast({
+      title: "Verification email resent",
+      description: "Please check your inbox."
+    });
   };
   
   const handleContinue = () => {
-    // For MVP purposes, we'll just simulate email verification
-    verifyEmail(email);
+    // For demo purposes only - in a real app, we would never expose the token in the UI
+    // The token would be sent via email with a link that includes the token
+    const demoToken = localStorage.getItem("verificationToken");
+    if (demoToken) {
+      verifyEmail(demoToken);
+    } else {
+      toast({
+        title: "No verification token found",
+        description: "Please register first or check your email.",
+        variant: "destructive"
+      });
+    }
   };
 
   return (
