@@ -1,6 +1,5 @@
-
 import React from 'react';
-import MainLayout from '@/components/MainLayout';
+import MainLayout from '@/components/MainLayout.jsx';
 
 const Attendance: React.FC = () => {
   return (

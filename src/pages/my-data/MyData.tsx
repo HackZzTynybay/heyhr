@@ -1,6 +1,6 @@
 
 import React from 'react';
-import MainLayout from '@/components/MainLayout';
+import MainLayout from '@/components/MainLayout.jsx';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { User, Mail, Phone, Calendar, MapPin } from 'lucide-react';
 
