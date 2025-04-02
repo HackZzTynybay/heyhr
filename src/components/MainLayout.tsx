@@ -18,7 +18,7 @@ interface MainLayoutProps {
 
 const MainLayout: React.FC<MainLayoutProps> = ({ children }) => {
   const location = useLocation();
-  const { onboardingData } = useAuth();
+  const { onboardingData, logoutUser } = useAuth();
   const [searchValue, setSearchValue] = useState('');
   
   const initials = onboardingData?.user?.firstName && onboardingData?.user?.lastName 
@@ -217,16 +217,22 @@ const MainLayout: React.FC<MainLayoutProps> = ({ children }) => {
               <DropdownMenu>
                 <DropdownMenuTrigger asChild>
                   <button className="flex items-center space-x-2">
-                    <Avatar className="h-8 w-8 bg-amber-500 text-white">
+                    <Avatar className="h-8 w-8 bg-blue-500 text-white">
                       <AvatarFallback>{initials}</AvatarFallback>
                     </Avatar>
                     <span className="text-sm text-gray-700">{initials}</span>
                   </button>
                 </DropdownMenuTrigger>
                 <DropdownMenuContent align="end" className="w-56">
-                  <DropdownMenuItem>Profile</DropdownMenuItem>
-                  <DropdownMenuItem>Account Settings</DropdownMenuItem>
-                  <DropdownMenuItem>Log out</DropdownMenuItem>
+                  <DropdownMenuItem asChild>
+                    <Link to="/my-data/profile">Profile</Link>
+                  </DropdownMenuItem>
+                  <DropdownMenuItem asChild>
+                    <Link to="/settings">Account Settings</Link>
+                  </DropdownMenuItem>
+                  <DropdownMenuItem onClick={logoutUser}>
+                    Log out
+                  </DropdownMenuItem>
                 </DropdownMenuContent>
               </DropdownMenu>
             </div>

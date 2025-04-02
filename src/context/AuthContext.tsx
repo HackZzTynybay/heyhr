@@ -1,4 +1,3 @@
-
 import React, { createContext, useContext, useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { useToast } from "@/components/ui/use-toast";
@@ -249,10 +248,25 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   };
 
   const logoutUser = () => {
+    // Clear all authentication and onboarding data
     localStorage.removeItem("currentUser");
+    localStorage.removeItem("onboardingInProgress");
+    localStorage.removeItem("onboardingData");
+    
+    // Reset all state variables
     setCurrentUser(null);
     setIsAuthenticated(false);
+    setIsOnboarding(false);
+    setOnboardingStep(0);
+    setOnboardingData(defaultOnboardingData);
+    
+    // Navigate to login page
     navigate("/login");
+    
+    toast({
+      title: "Logged out successfully",
+      description: "You have been logged out of your account.",
+    });
   };
 
   const updateOnboardingData = (data: any) => {
