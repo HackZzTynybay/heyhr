@@ -1,8 +1,8 @@
 
 import React from 'react';
-import MainLayout from '@/components/MainLayout';
+import MainLayout from '@/components/MainLayout.jsx';
 
-const Payroll: React.FC = () => {
+const Payroll = () => {
   return (
     <MainLayout>
       <div className="space-y-4">

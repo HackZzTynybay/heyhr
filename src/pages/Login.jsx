@@ -1,10 +1,10 @@
 
 import React, { useState } from 'react';
 import { Link } from 'react-router-dom';
-import { Button } from '@/components/ui/button';
-import FormField from '@/components/FormField';
-import OnboardingLayout from '@/components/OnboardingLayout';
-import { useAuth } from '@/context/AuthContext';
+import { Button } from '@/components/ui/button.jsx';
+import FormField from '@/components/FormField.jsx';
+import OnboardingLayout from '@/components/OnboardingLayout.jsx';
+import { useAuth } from '@/context/AuthContext.jsx';
 
 const Login = () => {
   const { loginUser } = useAuth();

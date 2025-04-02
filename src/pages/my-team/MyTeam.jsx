@@ -1,7 +1,8 @@
+
 import React from 'react';
 import MainLayout from '@/components/MainLayout.jsx';
 
-const MyTeam: React.FC = () => {
+const MyTeam = () => {
   return (
     <MainLayout>
       <div className="space-y-4">

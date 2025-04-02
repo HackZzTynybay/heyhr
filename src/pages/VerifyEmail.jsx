@@ -1,10 +1,10 @@
 
 import React, { useEffect } from 'react';
-import { Button } from '@/components/ui/button';
+import { Button } from '@/components/ui/button.jsx';
 import { Link, useSearchParams } from 'react-router-dom';
-import OnboardingLayout from '@/components/OnboardingLayout';
-import { useAuth } from '@/context/AuthContext';
-import { toast } from '@/components/ui/use-toast';
+import OnboardingLayout from '@/components/OnboardingLayout.jsx';
+import { useAuth } from '@/context/AuthContext.jsx';
+import { toast } from '@/components/ui/use-toast.js';
 
 const VerifyEmail = () => {
   const { verifyEmail, onboardingData } = useAuth();

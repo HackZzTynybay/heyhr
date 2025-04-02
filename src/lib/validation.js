@@ -1,11 +1,9 @@
 
-// Email validation
 export const validateEmail = (email) => {
   const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
   return emailRegex.test(email);
 };
 
-// Password validation
 export const validatePassword = (password) => {
   const hasEightChars = password.length >= 8;
   const hasUppercase = /[A-Z]/.test(password);
@@ -23,7 +21,6 @@ export const validatePassword = (password) => {
   };
 };
 
-// Company form validation
 export const validateCompanyForm = (data) => {
   const errors = {};
   

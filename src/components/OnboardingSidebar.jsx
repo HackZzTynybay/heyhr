@@ -1,14 +1,10 @@
 
 import React from 'react';
-import { useAuth } from '@/context/AuthContext';
+import { useAuth } from '@/context/AuthContext.jsx';
 import { CheckCircle, Circle } from 'lucide-react';
-import Logo from './Logo';
+import Logo from './Logo.jsx';
 
-interface OnboardingSidebarProps {
-  currentStep: 'departments' | 'roles' | 'employees';
-}
-
-const OnboardingSidebar: React.FC<OnboardingSidebarProps> = ({ currentStep }) => {
+const OnboardingSidebar = ({ currentStep }) => {
   const { onboardingStep } = useAuth();
   
   const steps = [

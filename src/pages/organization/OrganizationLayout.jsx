@@ -3,7 +3,7 @@ import React from 'react';
 import { Outlet } from 'react-router-dom';
 import MainLayout from '@/components/MainLayout.jsx';
 
-const OrganizationLayout: React.FC = () => {
+const OrganizationLayout = () => {
   return (
     <MainLayout>
       <div className="relative flex w-full max-w-7xl mx-auto">

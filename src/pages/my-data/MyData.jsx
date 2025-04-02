@@ -1,10 +1,10 @@
 
 import React from 'react';
 import MainLayout from '@/components/MainLayout.jsx';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card.jsx';
 import { User, Mail, Phone, Calendar, MapPin } from 'lucide-react';
 
-const MyData: React.FC = () => {
+const MyData = () => {
   // Mock user data
   const userData = {
     name: 'John Doe',

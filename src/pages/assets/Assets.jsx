@@ -1,7 +1,8 @@
+
 import React from 'react';
 import MainLayout from '@/components/MainLayout.jsx';
 
-const Assets: React.FC = () => {
+const Assets = () => {
   return (
     <MainLayout>
       <div className="space-y-4">

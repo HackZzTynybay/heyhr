@@ -1,10 +1,10 @@
 
 import React, { useState } from 'react';
-import { Button } from '@/components/ui/button';
-import FormField from '@/components/FormField';
-import OnboardingLayout from '@/components/OnboardingLayout';
-import { useAuth } from '@/context/AuthContext';
-import { validateEmail } from '@/lib/validation';
+import { Button } from '@/components/ui/button.jsx';
+import FormField from '@/components/FormField.jsx';
+import OnboardingLayout from '@/components/OnboardingLayout.jsx';
+import { useAuth } from '@/context/AuthContext.jsx';
+import { validateEmail } from '@/lib/validation.js';
 
 const EditEmail = () => {
   const { onboardingData, updateEmail } = useAuth();

@@ -1,8 +1,8 @@
 
 import React from 'react';
-import MainLayout from '@/components/MainLayout';
+import MainLayout from '@/components/MainLayout.jsx';
 
-const Settings: React.FC = () => {
+const Settings = () => {
   return (
     <MainLayout>
       <div className="space-y-4">
