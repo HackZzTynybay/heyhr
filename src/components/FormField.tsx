@@ -21,6 +21,7 @@ interface FormFieldProps {
   required?: boolean;
   options?: { label: string; value: string }[];
   onSelectChange?: (value: string) => void;
+  icon?: React.ReactNode;
 }
 
 const FormField: React.FC<FormFieldProps> = ({
@@ -34,6 +35,7 @@ const FormField: React.FC<FormFieldProps> = ({
   required = false,
   options,
   onSelectChange,
+  icon,
 }) => {
   if (type === 'select' && options) {
     return (
@@ -45,8 +47,9 @@ const FormField: React.FC<FormFieldProps> = ({
         <Select value={value} onValueChange={onSelectChange}>
           <SelectTrigger 
             id={name}
-            className={`w-full ${error ? 'border-red-500' : ''}`}
+            className={`w-full ${error ? 'border-red-500' : ''} ${icon ? 'pl-9' : ''}`}
           >
+            {icon && <span className="absolute left-3 top-1/2 transform -translate-y-1/2">{icon}</span>}
             <SelectValue placeholder="Select" />
           </SelectTrigger>
           <SelectContent>
@@ -69,14 +72,17 @@ const FormField: React.FC<FormFieldProps> = ({
           {label}
           {required && <span className="text-red-500">*</span>}
         </Label>
-        <Input
-          type="date"
-          id={name}
-          name={name}
-          value={value}
-          onChange={onChange}
-          className={`w-full ${error ? 'border-red-500' : ''}`}
-        />
+        <div className="relative">
+          {icon && <span className="absolute left-3 top-1/2 transform -translate-y-1/2">{icon}</span>}
+          <Input
+            type="date"
+            id={name}
+            name={name}
+            value={value}
+            onChange={onChange}
+            className={`w-full ${error ? 'border-red-500' : ''} ${icon ? 'pl-9' : ''}`}
+          />
+        </div>
         {error && <p className="text-red-500 text-sm mt-1">{error}</p>}
       </div>
     );
@@ -88,15 +94,18 @@ const FormField: React.FC<FormFieldProps> = ({
         {label}
         {required && <span className="text-red-500">*</span>}
       </Label>
-      <Input
-        type={type}
-        id={name}
-        name={name}
-        placeholder={placeholder}
-        value={value}
-        onChange={onChange}
-        className={`w-full ${error ? 'border-red-500' : ''}`}
-      />
+      <div className="relative">
+        {icon && <span className="absolute left-3 top-1/2 transform -translate-y-1/2">{icon}</span>}
+        <Input
+          type={type}
+          id={name}
+          name={name}
+          placeholder={placeholder}
+          value={value}
+          onChange={onChange}
+          className={`w-full ${error ? 'border-red-500' : ''} ${icon ? 'pl-9' : ''}`}
+        />
+      </div>
       {error && <p className="text-red-500 text-sm mt-1">{error}</p>}
     </div>
   );
