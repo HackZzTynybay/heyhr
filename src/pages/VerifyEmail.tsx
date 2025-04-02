@@ -31,10 +31,18 @@ const VerifyEmail: React.FC = () => {
         </p>
         
         <Button 
+          onClick={handleResendEmail}
+          variant="outline"
+          className="w-full mb-4"
+        >
+          Resend Email
+        </Button>
+        
+        <Button 
           onClick={handleContinue}
           className="w-full mb-4 bg-brand-blue hover:bg-blue-600"
         >
-          Resend Email
+          Next
         </Button>
         
         <div className="mt-4">
