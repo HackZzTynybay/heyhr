@@ -2,9 +2,9 @@
 import React, { useState } from 'react';
 import { Link } from 'react-router-dom';
 import { Plus, Filter, Search, MapPin, Mail } from 'lucide-react';
-import { Button } from '@/components/ui/button';
-import { Input } from '@/components/ui/input';
-import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
+import { Button } from '@/components/ui/button.jsx';
+import { Input } from '@/components/ui/input.jsx';
+import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar.jsx';
 import {
   Sheet,
   SheetClose,
@@ -12,33 +12,21 @@ import {
   SheetHeader,
   SheetTitle,
   SheetTrigger,
-} from "@/components/ui/sheet";
+} from "@/components/ui/sheet.jsx";
 import {
   Select,
   SelectContent,
   SelectItem,
   SelectTrigger,
   SelectValue,
-} from "@/components/ui/select";
+} from "@/components/ui/select.jsx";
 
-interface Employee {
-  id: string;
-  name: string;
-  title: string;
-  department: string;
-  location: string;
-  email: string;
-  image?: string;
-  initials: string;
-  status: 'active' | 'inactive' | 'invited';
-}
-
-const EmployeesDirectory: React.FC = () => {
+const EmployeesDirectory = () => {
   const [searchText, setSearchText] = useState('');
   const [showFilter, setShowFilter] = useState(false);
   
   // Mock employees data
-  const employees: Employee[] = [
+  const employees = [
     {
       id: 'emp-1',
       name: 'Sarah Anderson',
@@ -71,7 +59,7 @@ const EmployeesDirectory: React.FC = () => {
     }
   ];
   
-  const getStatusColor = (status: string) => {
+  const getStatusColor = (status) => {
     switch(status) {
       case 'active':
         return 'bg-green-100 text-green-700';
@@ -180,79 +168,121 @@ const EmployeesDirectory: React.FC = () => {
                   <label className="text-sm font-medium">Status</label>
                   <Select defaultValue="all">
                     <SelectTrigger>
-                      <SelectValue placeholder="All Status" />
+                      <SelectValue placeholder="All statuses" />
                     </SelectTrigger>
                     <SelectContent>
-                      <SelectItem value="all">All Status</SelectItem>
+                      <SelectItem value="all">All statuses</SelectItem>
                       <SelectItem value="active">Active</SelectItem>
                       <SelectItem value="inactive">Inactive</SelectItem>
-                      <SelectItem value="invited">Invited</SelectItem>
                     </SelectContent>
                   </Select>
                 </div>
-              </div>
-              
-              <div className="flex justify-end space-x-2 mt-6">
-                <SheetClose asChild>
-                  <Button variant="outline">Reset</Button>
-                </SheetClose>
-                <SheetClose asChild>
-                  <Button>Apply</Button>
-                </SheetClose>
+                
+                <div className="pt-4 flex justify-end gap-2">
+                  <Button variant="outline" onClick={() => setShowFilter(false)}>
+                    Cancel
+                  </Button>
+                  <Button onClick={() => setShowFilter(false)}>
+                    Apply Filters
+                  </Button>
+                </div>
               </div>
             </SheetContent>
           </Sheet>
           
-          <Button asChild size="sm" className="flex items-center gap-1">
-            <Link to="/organization/employees/add">
-              <Plus className="h-4 w-4" />
-              <span>Add Employees</span>
-            </Link>
+          <Button className="flex items-center gap-1">
+            <Plus className="h-4 w-4" />
+            <span>Add Employee</span>
           </Button>
         </div>
       </div>
       
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-        {employees.map((employee) => (
-          <div 
-            key={employee.id}
-            className="bg-white rounded-lg border border-gray-200 p-6 shadow-sm"
-          >
-            <div className="flex items-center mb-4">
-              <Avatar className="h-12 w-12 mr-3">
-                {employee.image ? (
-                  <AvatarImage src={employee.image} alt={employee.name} />
-                ) : (
-                  <AvatarFallback className="bg-blue-100 text-blue-600">
-                    {employee.initials}
-                  </AvatarFallback>
-                )}
-              </Avatar>
-              <div>
-                <h3 className="font-medium">{employee.name}</h3>
-                <p className="text-sm text-gray-600">{employee.title}</p>
-                <p className="text-xs text-gray-500">{employee.department}</p>
-              </div>
-            </div>
-            
-            <div className="space-y-2 text-sm">
-              <div className="flex items-center text-gray-600">
-                <MapPin className="h-4 w-4 mr-2" />
-                <span>{employee.location}</span>
-              </div>
-              <div className="flex items-center text-gray-600">
-                <Mail className="h-4 w-4 mr-2" />
-                <span>{employee.email}</span>
-              </div>
-            </div>
-            
-            <div className="mt-4">
-              <span className={`inline-block px-2 py-1 text-xs rounded-full ${getStatusColor(employee.status)}`}>
-                {employee.status.charAt(0).toUpperCase() + employee.status.slice(1)}
-              </span>
-            </div>
+      <div className="bg-white rounded-lg border border-gray-200 shadow-sm overflow-hidden">
+        <div className="overflow-x-auto">
+          <table className="min-w-full divide-y divide-gray-200">
+            <thead className="bg-gray-50">
+              <tr>
+                <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                  Name
+                </th>
+                <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                  Department
+                </th>
+                <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                  Location
+                </th>
+                <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                  Email
+                </th>
+                <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                  Status
+                </th>
+                <th scope="col" className="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">
+                  Actions
+                </th>
+              </tr>
+            </thead>
+            <tbody className="bg-white divide-y divide-gray-200">
+              {employees.map((employee) => (
+                <tr key={employee.id}>
+                  <td className="px-6 py-4 whitespace-nowrap">
+                    <div className="flex items-center">
+                      <div className="flex-shrink-0 h-10 w-10">
+                        <Avatar>
+                          <AvatarFallback className="bg-blue-100 text-blue-600">
+                            {employee.initials}
+                          </AvatarFallback>
+                        </Avatar>
+                      </div>
+                      <div className="ml-4">
+                        <div className="text-sm font-medium text-gray-900">{employee.name}</div>
+                        <div className="text-sm text-gray-500">{employee.title}</div>
+                      </div>
+                    </div>
+                  </td>
+                  <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                    {employee.department}
+                  </td>
+                  <td className="px-6 py-4 whitespace-nowrap">
+                    <div className="flex items-center text-sm text-gray-500">
+                      <MapPin className="h-4 w-4 mr-1 text-gray-400" />
+                      {employee.location}
+                    </div>
+                  </td>
+                  <td className="px-6 py-4 whitespace-nowrap">
+                    <div className="flex items-center text-sm text-gray-500">
+                      <Mail className="h-4 w-4 mr-1 text-gray-400" />
+                      {employee.email}
+                    </div>
+                  </td>
+                  <td className="px-6 py-4 whitespace-nowrap">
+                    <span className={`px-2 inline-flex text-xs leading-5 font-semibold rounded-full ${getStatusColor(employee.status)}`}>
+                      {employee.status.charAt(0).toUpperCase() + employee.status.slice(1)}
+                    </span>
+                  </td>
+                  <td className="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
+                    <Button variant="ghost" size="sm" className="text-blue-600 hover:text-blue-900">
+                      Edit
+                    </Button>
+                  </td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
+        <div className="px-6 py-4 flex justify-between items-center border-t border-gray-200">
+          <div className="text-sm text-gray-500">
+            Showing <span className="font-medium">1</span> to <span className="font-medium">{employees.length}</span> of <span className="font-medium">{employees.length}</span> results
           </div>
-        ))}
+          <div className="flex-1 flex justify-end">
+            <Button variant="outline" size="sm" disabled className="mr-2">
+              Previous
+            </Button>
+            <Button variant="outline" size="sm" disabled>
+              Next
+            </Button>
+          </div>
+        </div>
       </div>
     </div>
   );

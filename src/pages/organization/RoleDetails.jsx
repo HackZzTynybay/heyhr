@@ -1,35 +1,28 @@
 
 import React, { useState } from 'react';
 import { useParams, useNavigate, useSearchParams } from 'react-router-dom';
-import { Button } from '@/components/ui/button';
-import { Input } from '@/components/ui/input';
+import { Button } from '@/components/ui/button.jsx';
+import { Input } from '@/components/ui/input.jsx';
 import {
   Tabs,
   TabsContent,
   TabsList,
   TabsTrigger,
-} from "@/components/ui/tabs";
+} from "@/components/ui/tabs.jsx";
 import { 
   Select,
   SelectContent,
   SelectItem,
   SelectTrigger,
   SelectValue 
-} from '@/components/ui/select';
-import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group';
-import { Label } from '@/components/ui/label';
-import { toast } from '@/components/ui/use-toast';
-import { Avatar, AvatarFallback } from '@/components/ui/avatar';
+} from '@/components/ui/select.jsx';
+import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group.jsx';
+import { Label } from '@/components/ui/label.jsx';
+import { toast } from '@/components/ui/use-toast.js';
+import { Avatar, AvatarFallback } from '@/components/ui/avatar.jsx';
 
-interface Employee {
-  id: string;
-  name: string;
-  title: string;
-  initials: string;
-}
-
-const RoleDetails: React.FC = () => {
-  const { id } = useParams<{ id: string }>();
+const RoleDetails = () => {
+  const { id } = useParams();
   const [searchParams] = useSearchParams();
   const isEditing = searchParams.get('edit') === 'true';
   const navigate = useNavigate();
@@ -43,20 +36,20 @@ const RoleDetails: React.FC = () => {
     permissionTemplate: 'HR Manager'
   });
   
-  const employees: Employee[] = [
+  const employees = [
     { id: 'emp-1', name: 'Jerome Bell', title: 'Tech Lead', initials: 'JB' }
   ];
   
-  const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
+  const handleInputChange = (e) => {
     const { name, value } = e.target;
     setRole(prev => ({ ...prev, [name]: value }));
   };
   
-  const handlePermissionMethodChange = (value: string) => {
+  const handlePermissionMethodChange = (value) => {
     setRole(prev => ({ ...prev, permissionMethod: value }));
   };
   
-  const handleTemplateChange = (value: string) => {
+  const handleTemplateChange = (value) => {
     setRole(prev => ({ ...prev, permissionTemplate: value }));
   };
   

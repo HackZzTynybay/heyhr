@@ -1,12 +1,12 @@
 
 import React, { useState } from 'react';
 import { Link } from 'react-router-dom';
-import { Checkbox } from '@/components/ui/checkbox';
-import { Button } from '@/components/ui/button';
-import FormField from '@/components/FormField';
-import OnboardingLayout from '@/components/OnboardingLayout';
-import { validateCompanyForm } from '@/lib/validation';
-import { useAuth } from '@/context/AuthContext';
+import { Checkbox } from '@/components/ui/checkbox.jsx';
+import { Button } from '@/components/ui/button.jsx';
+import FormField from '@/components/FormField.jsx';
+import OnboardingLayout from '@/components/OnboardingLayout.jsx';
+import { validateCompanyForm } from '@/lib/validation.js';
+import { useAuth } from '@/context/AuthContext.jsx';
 
 const Register = () => {
   const { registerUser } = useAuth();

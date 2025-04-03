@@ -1,11 +1,11 @@
 
 import React, { useState } from 'react';
-import { Button } from '@/components/ui/button';
-import { Input } from '@/components/ui/input';
+import { Button } from '@/components/ui/button.jsx';
+import { Input } from '@/components/ui/input.jsx';
 import { Eye, EyeOff, Check, AlertCircle } from 'lucide-react';
-import OnboardingLayout from '@/components/OnboardingLayout';
-import { useAuth } from '@/context/AuthContext';
-import { validatePassword } from '@/lib/validation';
+import OnboardingLayout from '@/components/OnboardingLayout.jsx';
+import { useAuth } from '@/context/AuthContext.jsx';
+import { validatePassword } from '@/lib/validation.js';
 import { Link, useSearchParams } from 'react-router-dom';
 
 const SetPassword = () => {
@@ -17,7 +17,7 @@ const SetPassword = () => {
   const [showPassword, setShowPassword] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
   
-  const email = onboardingData.company.email;
+  const email = onboardingData.company?.email;
   
   const passwordValidation = validatePassword(password);
   const passwordStrength = 

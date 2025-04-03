@@ -1,6 +1,6 @@
 
 import React from 'react';
-import MainLayout from '@/components/MainLayout';
+import MainLayout from '@/components/MainLayout.jsx';
 import {
   CheckCircle,
   Clock,
@@ -10,11 +10,11 @@ import {
   X,
   Check
 } from 'lucide-react';
-import { Button } from '@/components/ui/button';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
+import { Button } from '@/components/ui/button.jsx';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card.jsx';
+import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar.jsx';
 
-const Dashboard: React.FC = () => {
+const Dashboard = () => {
   // Mock data for the dashboard
   const stats = [
     { 
