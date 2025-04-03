@@ -8,7 +8,7 @@ import OnboardingLayout from '@/components/OnboardingLayout';
 import { validateCompanyForm } from '@/lib/validation';
 import { useAuth } from '@/context/AuthContext';
 
-const Register = () => {
+const Register: React.FC = () => {
   const { registerUser } = useAuth();
   
   const [formData, setFormData] = useState({
@@ -22,10 +22,10 @@ const Register = () => {
     termsAgreed: false
   });
   
-  const [errors, setErrors] = useState({});
+  const [errors, setErrors] = useState<Record<string, string>>({});
   const [isLoading, setIsLoading] = useState(false);
   
-  const handleChange = (e) => {
+  const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value } = e.target;
     setFormData({
       ...formData,
@@ -38,7 +38,7 @@ const Register = () => {
     }
   };
   
-  const handleSelectChange = (value) => {
+  const handleSelectChange = (value: string) => {
     setFormData({
       ...formData,
       employees: value
@@ -62,7 +62,7 @@ const Register = () => {
     }
   };
   
-  const handleSubmit = async (e) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     
     const validation = validateCompanyForm(formData);

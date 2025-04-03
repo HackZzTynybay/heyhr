@@ -8,7 +8,7 @@ import { useAuth } from '@/context/AuthContext';
 import { validatePassword } from '@/lib/validation';
 import { Link, useSearchParams } from 'react-router-dom';
 
-const SetPassword = () => {
+const SetPassword: React.FC = () => {
   const { onboardingData, setPassword } = useAuth();
   const [searchParams] = useSearchParams();
   const urlToken = searchParams.get('token');
@@ -44,11 +44,11 @@ const SetPassword = () => {
     setShowPassword(!showPassword);
   };
   
-  const handleChange = (e) => {
+  const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     setPasswordValue(e.target.value);
   };
   
-  const handleSubmit = async (e) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     
     if (!passwordValidation.isValid) {
